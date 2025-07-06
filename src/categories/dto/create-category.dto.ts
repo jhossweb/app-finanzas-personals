@@ -14,7 +14,7 @@ export class CreateCategoryDto
 
     @IsOptional()
     @IsBoolean()
-    isDefault?: boolean;
+    isDefault: boolean;
 
     @IsOptional()
     @IsUUID()

@@ -32,17 +32,22 @@ export class CategoriesController {
 
   @Get()
   findAll() {
-    return this.categoriesService.findAll();
+    return this.categoriesService.findAllParent();
   }
 
+  /*
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.categoriesService.findOne(+id);
-  }
+  findOne(@Param('id') id: string, ) {
+    return this.categoriesService.findOneCategoryPersonal(id);
+  }*/
 
-  @Patch(':id')
-  update(@Param('id') id: string, @Body() updateCategoryDto: UpdateCategoryDto) {
-    return this.categoriesService.update(+id, updateCategoryDto);
+  /** category personal */
+  @Patch('personal/:userId')
+  update(
+    @Param('userId', ParseUUIDPipe) id: string, 
+    @Body() updateCategoryDto: UpdateCategoryDto
+  ) {
+    return this.categoriesService.updateChildrenCategory(id, updateCategoryDto);
   }
 
   @Delete(':id')

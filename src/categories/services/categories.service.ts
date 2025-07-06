@@ -1,11 +1,12 @@
-import { Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
+import { Injectable, NotFoundException } from '@nestjs/common';
+import { Repository, IsNull } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { CreateCategoryDto } from '../dto/create-category.dto';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
 import { CategoryEntity } from '../entities/category.entity';
 import { UserEntity } from '../../users/entities/user.entity';
+import { NotFoundError } from 'rxjs';
 
 @Injectable()
 export class CategoriesService {
@@ -44,29 +45,28 @@ export class CategoriesService {
 
   async createCategoryPersonal(
     createCategoryDto: CreateCategoryDto,
-    userId: string,
-    parentId?: string,
+    userId: string
   ): Promise<CategoryEntity> {
     
     const { name, type } = createCategoryDto;
     const user = await this.userRepository.findOneBy({ id: userId });
     
-    if (!user) 
-      throw new Error(`User with ID ${userId} not found`);
+    if(!user) throw new NotFoundException(`User with ID ${userId} not found`);
 
-    const parentCategory = parentId
-      ? await this.categoryRepository.findOneBy({ id: parentId })
-      : undefined;
+    const parentCategory = await this.categoryRepository.findOne({
+      where: { id: createCategoryDto.parentId, isDefault: true }
+    })
 
-    if (parentId && !parentCategory)
-      throw new Error(`Parent category with ID ${parentId} not found`); 
+    if (!parentCategory) {
+      throw new NotFoundException(`Parent category with ID ${createCategoryDto.parentId} not found`);
+    }
 
     const newCategory = this.categoryRepository.create({
-      name, 
+      name,
       type: type as CategoryEntity['type'],
       isDefault: false,
       user: { id: userId },
-      parent: parentCategory ? { id: parentId } : undefined,
+      parent: parentCategory, // Set the parent category
     });
 
     return await this.categoryRepository.save(newCategory);
@@ -74,16 +74,56 @@ export class CategoriesService {
 
   
   
-  findAll() {
+  findAllParent() {
+    return this.categoryRepository.find({
+      where: {
+        isDefault: false,
+      },
+      relations: ['user'],
+    });
     return `This action returns all categories`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
+  async findOneCategoryPersonal(id: string, userId: string): Promise<CategoryEntity> {
+    const category = await this.categoryRepository.findOne({
+      where: { id, isDefault: false, user: { id: userId } },
+      relations: ['user', 'parent'],
+    });
+
+    if (!category) {
+      throw new NotFoundException(`Category with ID ${id} not found`);
+    }
+
+    return category;
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+  async updateChildrenCategory (
+    userId: string,
+    updateCategoryDto: UpdateCategoryDto
+  ) {
+    
+    // Category for updated
+    const category = await this.categoryRepository.findOne({
+        where: { id: updateCategoryDto.id, isDefault: false, user: { id: userId} }
+    });
+
+    if (!category) {
+      throw new NotFoundException(`Category with ID ${updateCategoryDto.id} not found`);
+    }
+
+    // Ensure type is cast to CategoryEntity['type']
+    // Remove or properly set 'user' property for merge
+    const { user, ...rest } = updateCategoryDto;
+    const updateData = {
+      ...rest,
+      type: updateCategoryDto.type as CategoryEntity['type'],
+      // If you need to update user, use: user: { id: userId }
+    };
+    const updateCategoryPersonal = await this.categoryRepository.merge(category, updateData);
+    const update = await this.categoryRepository.save(updateCategoryPersonal);
+    console.log(update)
+    return
+
   }
 
   remove(id: number) {
