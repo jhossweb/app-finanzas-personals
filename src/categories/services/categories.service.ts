@@ -84,10 +84,10 @@ export class CategoriesService {
     return `This action returns all categories`;
   }
 
-  async findOneCategoryPersonal(id: string, userId: string): Promise<CategoryEntity> {
+  async findOneCategoryPersonal(id: string): Promise<CategoryEntity> {
     const category = await this.categoryRepository.findOne({
-      where: { id, isDefault: false, user: { id: userId } },
-      relations: ['user', 'parent'],
+      where: { id, isDefault: false },
+      relations: ['user'],
     });
 
     if (!category) {

@@ -40,6 +40,18 @@ export class UsersService {
       throw new Error(`Error finding user by email: ${error.message}`);
     }
   }
+  /**
+   * Finds a user by their username.
+   * @param username - The username of the user to find.
+   * @returns The user entity if found, otherwise null.
+   */
+  async findByUsername(username: string): Promise<UserEntity | null> {
+    try {
+      return await this.userRepository.findOne({ where: { username } });
+    } catch (error) {
+      throw new Error(`Error finding user by username: ${error.message}`);
+    }
+  }
 
   
   /**
