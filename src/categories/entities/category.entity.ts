@@ -1,6 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import { BaseEntity } from "../../config/base.entity";
 import { UserEntity } from "../../users/entities/user.entity";
+import { TransactionEntity } from "../../transactions/entities/transaction.entity";
 
 export enum CategoryType {
     INCOME = 'ingreso',
@@ -53,4 +54,8 @@ export class CategoryEntity extends BaseEntity {
     // Relación recursiva: una categoría puede tener muchas categorías hijas
     @OneToMany(() => CategoryEntity, (category) => category.parent)
     children: CategoryEntity[];
+
+
+    @OneToMany( () => TransactionEntity, (transaction) => transaction.category_id)
+    transactions: TransactionEntity[];
 }
