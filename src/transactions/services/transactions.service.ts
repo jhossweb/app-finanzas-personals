@@ -1,10 +1,11 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 
 import { CreateTransactionDto } from '../dto/create-transaction.dto';
 import { UpdateTransactionDto } from '../dto/update-transaction.dto';
 import { TransactionEntity } from '../entities/transaction.entity';
+import e from 'express';
 
 @Injectable()
 export class TransactionsService {
@@ -14,7 +15,7 @@ export class TransactionsService {
     private readonly transactionRepository: Repository<TransactionEntity>,
   ) {}
 
-  async create(dataDto: CreateTransactionDto, user_id: string) {
+  async create(dataDto: CreateTransactionDto, user_id: string): Promise<TransactionEntity> {
     const transaction = this.transactionRepository.create({
       ...dataDto,
       user_id: { id: user_id }, // If 'user' is a relation to UserEntity
@@ -40,18 +41,36 @@ export class TransactionsService {
   }
 
   async findByCategory(categoryId: string) {
-    return this.transactionRepository.find({
+    return await this.transactionRepository.find({
       where: { category_id: { id: categoryId } },
       relations: ['category_id', 'user_id'], // Adjust relations as necessary
     });
   }
 
-  
-  update(id: number, updateTransactionDto: UpdateTransactionDto) {
-    return `This action updates a #${id} transaction`;
+  async findByUser(userId: string) {
+    return await this.transactionRepository.find({
+      where: { user_id: { id: userId } },
+      relations: ['user_id', 'category_id'], // Adjust relations as necessary
+    });
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} transaction`;
+  
+  async update(id: string, updateTransactionDto: UpdateTransactionDto, user_id: string): Promise<UpdateResult> {
+    try {
+      return await this.transactionRepository.update({ id, user_id: { id: user_id } }, updateTransactionDto);
+    } catch (error) {
+      console.error('Error updating transaction:', error);
+      throw new Error('Failed to update transaction');
+    }
+  }
+
+  async remove(id: string, user_id: string): Promise<DeleteResult> {
+    try {
+      return await this.transactionRepository.delete({ id, user_id: { id: user_id } });
+    }
+    catch (error) {
+      console.error('Error deleting transaction:', error);
+      throw new Error('Failed to delete transaction');
+    }
   }
 }

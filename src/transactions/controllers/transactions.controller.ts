@@ -42,12 +42,14 @@ export class TransactionsController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTransactionDto: UpdateTransactionDto) {
-    return this.transactionsService.update(+id, updateTransactionDto);
+  update(@Param('id') id: string, @Body() updateTransactionDto: UpdateTransactionDto, @Req() req: Request) {
+    const user = req.user as UserEntity;
+    return this.transactionsService.update(id, updateTransactionDto, user.id);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.transactionsService.remove(+id);
+  remove(@Param('id') id: string, @Req() req: Request) {
+    const user = req.user as UserEntity;
+    return this.transactionsService.remove(id, user.id);
   }
 }
