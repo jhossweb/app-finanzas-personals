@@ -18,9 +18,5 @@ export class CreateTransactionDto
 
     @IsString()
     @IsUUID()
-    user_id: UserEntity;
-
-    @IsString()
-    @IsUUID()
     category_id: CategoryEntity;
 }
