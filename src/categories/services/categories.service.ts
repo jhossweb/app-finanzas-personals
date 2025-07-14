@@ -1,12 +1,12 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Repository, IsNull } from 'typeorm';
+import { Repository, IsNull, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { CreateCategoryDto } from '../dto/create-category.dto';
 import { UpdateCategoryDto } from '../dto/update-category.dto';
 import { CategoryEntity } from '../entities/category.entity';
 import { UserEntity } from '../../users/entities/user.entity';
-import { NotFoundError } from 'rxjs';
+
 
 @Injectable()
 export class CategoriesService {
@@ -74,14 +74,24 @@ export class CategoriesService {
 
   
   
-  findAllParent() {
-    return this.categoryRepository.find({
-      where: {
-        isDefault: false,
-      },
+  async findAllCategoryChildren(user_id: string): Promise<CategoryEntity[]> {
+      return await this.categoryRepository.find({
+        where: { isDefault: false, user: { id: user_id } },
+        relations: ['user'],
+      });
+  }
+
+  async findByCategoryActive(category_id: string): Promise<CategoryEntity> {
+    const category = await this.categoryRepository.findOne({
+      where: { id: category_id, isActive: true },
       relations: ['user'],
     });
-    return `This action returns all categories`;
+
+    if (!category) {
+      throw new NotFoundException(`Category with ID ${category_id} not found`); 
+    }
+
+    return category;
   }
 
   async findOneCategoryPersonal(id: string): Promise<CategoryEntity> {
@@ -99,8 +109,9 @@ export class CategoriesService {
 
   async updateChildrenCategory (
     userId: string,
-    updateCategoryDto: UpdateCategoryDto
-  ) {
+    updateCategoryDto: UpdateCategoryDto,
+    id_category: string
+  ): Promise<CategoryEntity> {
     
     // Category for updated
     const category = await this.categoryRepository.findOne({
@@ -113,17 +124,28 @@ export class CategoriesService {
 
     // Ensure type is cast to CategoryEntity['type']
     // Remove or properly set 'user' property for merge
-    const { user, ...rest } = updateCategoryDto;
+    const { type, ...rest } = updateCategoryDto;
     const updateData = {
       ...rest,
-      type: updateCategoryDto.type as CategoryEntity['type'],
+      type: type as CategoryEntity['type'],
       // If you need to update user, use: user: { id: userId }
     };
     const updateCategoryPersonal = await this.categoryRepository.merge(category, updateData);
     const update = await this.categoryRepository.save(updateCategoryPersonal);
     console.log(update)
-    return
+    return update;
 
+  }
+
+  async updateCategoryPersonalActive(id: string, user_id: string, data: boolean): Promise<UpdateResult> {
+    try{
+      return await this.categoryRepository.update(
+        { id, user: { id: user_id } },
+        { isActive: data }
+      );
+    }catch (error) {
+      throw new NotFoundException(`Category with ID ${id} not found`);
+    }
   }
 
   remove(id: number) {

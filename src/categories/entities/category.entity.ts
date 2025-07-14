@@ -39,6 +39,9 @@ export class CategoryEntity extends BaseEntity {
     @Column({ default: true })
     isDefault: boolean;
 
+    @Column({ type: 'boolean', default: true })
+    isActive: boolean;
+
     @ManyToOne(
         () => UserEntity,
         (user) => user.categories,

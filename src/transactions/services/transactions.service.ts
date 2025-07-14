@@ -1,11 +1,15 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 
 import { CreateTransactionDto } from '../dto/create-transaction.dto';
 import { UpdateTransactionDto } from '../dto/update-transaction.dto';
 import { TransactionEntity } from '../entities/transaction.entity';
-import e from 'express';
+import { CategoriesService } from '@/categories/services/categories.service';
+import { NotFoundError } from 'rxjs';
+
+
+
 
 @Injectable()
 export class TransactionsService {
@@ -13,13 +17,19 @@ export class TransactionsService {
   constructor(
     @InjectRepository(TransactionEntity)
     private readonly transactionRepository: Repository<TransactionEntity>,
+
+    private readonly categoryService: CategoriesService
   ) {}
 
   async create(dataDto: CreateTransactionDto, user_id: string): Promise<TransactionEntity> {
+
+    const category = await this.categoryService.findOneCategoryPersonal(String(dataDto.category_id));
+    if (!category) throw new NotFoundException(`Category with ID ${dataDto.category_id} not found`);
+
     const transaction = this.transactionRepository.create({
       ...dataDto,
-      user_id: { id: user_id }, // If 'user' is a relation to UserEntity
-      category_id: dataDto.category_id, // Assuming category_id is a UUID or similar identifier
+      user_id: { id: user_id }, // If 'user_id' is a relation, ensure this matches your entity definition
+      category_id: category, // Assign the actual category entity
     });
 
     try {

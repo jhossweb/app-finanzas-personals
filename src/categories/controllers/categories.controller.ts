@@ -1,41 +1,50 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Req, HttpCode, HttpStatus, ParseUUIDPipe, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Req, HttpCode, HttpStatus, ParseUUIDPipe, UseGuards, UnauthorizedException, Put } from '@nestjs/common';
 import { CategoriesService } from '../services/categories.service';
 import { CreateCategoryDto } from '../dto/create-category.dto';
-import { UpdateCategoryDto } from '../dto/update-category.dto';
+import { UpdateCategoryActive, UpdateCategoryDto } from '../dto/update-category.dto';
 import { Request } from 'express';
 import { create } from 'domain';
 import { AuthGuard } from '@nestjs/passport';
+import { UserEntity } from '@/users/entities/user.entity';
 
 @Controller('categories')
+@UseGuards(AuthGuard('jwt-cookie'))
 export class CategoriesController {
   constructor(private readonly categoriesService: CategoriesService) {}
 
-  @Post('user/:userId')
+  @Post('user')
   @HttpCode(HttpStatus.CREATED)
   async createParentCategory(
-    @Body() createCategoryDto: CreateCategoryDto, 
-    @Param('userId', ParseUUIDPipe) userId: string // Assuming req.user contains the authenticated user info
+    @Body() createCategoryDto: CreateCategoryDto,
+    @Req() req: Request
   ) {
-    console.log('User ID:', userId,` - ${createCategoryDto}`); // Log the user ID for debugging
-    
-    return this.categoriesService.createParentCategory(createCategoryDto, userId);
+    const user = req.user as UserEntity;
+    if (!user) throw new UnauthorizedException('User not authenticated');
+
+    return await this.categoriesService.createParentCategory(createCategoryDto, user.id);
   }
 
-  @Post('personal/:userId')
+  @Post('personal')
   @HttpCode(HttpStatus.CREATED)
   async createCategoryPersonal(
     @Body() createCategoryDto: CreateCategoryDto,
-    @Param('userId', ParseUUIDPipe) userId: string, // Assuming req
+    @Req() req: Request
   ) {
-    console.log('User ID:', userId, ` - ${createCategoryDto}`); // Log the user ID for debugging
-    return this.categoriesService.createCategoryPersonal(createCategoryDto, userId);
+    const user = req.user as UserEntity;
+    if (!user) throw new UnauthorizedException('User not authenticated');
+     
+    return this.categoriesService.createCategoryPersonal(createCategoryDto, user.id);
   }
 
 
-  @UseGuards(AuthGuard('jwt'))
   @Get()
-  findAll() {
-    return this.categoriesService.findAllParent();
+  async findAll(
+    @Req() req: Request
+  ) {
+    const user = req.user as UserEntity;
+    if (!user) throw new UnauthorizedException('User not authenticated');
+    
+    return await this.categoriesService.findAllCategoryChildren(user.id);
   }
 
   /* Category Person */
@@ -47,12 +56,30 @@ export class CategoriesController {
   }
 
   /** category personal */
-  @Patch('personal/:userId')
+  @Patch('personal/:id')
   update(
-    @Param('userId', ParseUUIDPipe) id: string, 
-    @Body() updateCategoryDto: UpdateCategoryDto
+    @Req() req: Request,
+    @Body() updateCategoryDto: UpdateCategoryDto,
+    @Param('id', ParseUUIDPipe) id: string
   ) {
-    return this.categoriesService.updateChildrenCategory(id, updateCategoryDto);
+    const user = req.user as UserEntity;
+    if (!user) throw new UnauthorizedException('User not authenticated');
+    console.log(`User ID: ${user.id}, Category ID: ${id}, Update Data:`, updateCategoryDto);
+    return this.categoriesService.updateChildrenCategory(user.id, updateCategoryDto, id);
+  }
+
+
+  /** Inactivated Category for user */
+  @Patch('personal/:id/active')
+  updateCategoryPersonalActive(
+    @Param('id', ParseUUIDPipe) id: string, 
+    @Body() updateCategoryActive: UpdateCategoryActive,
+    @Req() req: Request
+  ) {
+    const user = req.user as UserEntity;
+    if (!user) throw new UnauthorizedException('User not authenticated');
+
+    return this.categoriesService.updateCategoryPersonalActive(id, user.id, updateCategoryActive.isActive);
   }
 
   @Delete(':id')

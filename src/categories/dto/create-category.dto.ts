@@ -20,7 +20,8 @@ export class CreateCategoryDto
     @IsUUID()
     parentId?: string;
 
+    /*
     @IsOptional()
     @IsUUID()
-    user?: string;
+    user?: string; */
 }
