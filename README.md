@@ -1,98 +1,263 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# 📊 App Finanzas Personales
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+Una aplicación de gestión de finanzas personales construida con NestJS, TypeScript y SQLite.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 🚀 Descripción
 
-## Description
+Esta aplicación permite a los usuarios gestionar sus finanzas personales de manera eficiente, incluyendo:
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- **Gestión de usuarios** con autenticación JWT
+- **Categorización de transacciones** (ingresos, gastos, transferencias, inversiones, deudas, ahorros)
+- **Registro de transacciones** con montos, monedas y descripciones
+- **Sistema de roles** (USER y ADMIN)
+- **Jerarquía de categorías** (categorías padre e hijas)
+- **API RESTful** completa con autenticación
 
-## Project setup
+## 🛠️ Tecnologías Utilizadas
 
-```bash
-$ npm install
+- **Backend**: NestJS 11.0.1
+- **Lenguaje**: TypeScript 5.7.3
+- **Base de Datos**: SQLite 5.1.7
+- **ORM**: TypeORM 0.3.25
+- **Autenticación**: JWT, Passport
+- **Validación**: class-validator, class-transformer
+- **Encriptación**: bcryptjs
+
+## 📁 Estructura del Proyecto
+
+```
+src/
+├── auth/                 # Autenticación y autorización
+│   ├── controllers/      # Controladores de auth
+│   ├── services/         # Servicios de auth
+│   ├── strategies/       # Estrategias de Passport
+│   └── dto/             # Data Transfer Objects
+├── users/               # Gestión de usuarios
+│   ├── controllers/      # Controladores de usuarios
+│   ├── services/         # Servicios de usuarios
+│   ├── entities/         # Entidad User
+│   └── dto/             # DTOs de usuarios
+├── categories/           # Gestión de categorías
+│   ├── controllers/      # Controladores de categorías
+│   ├── services/         # Servicios de categorías
+│   ├── entities/         # Entidad Category
+│   └── dto/             # DTOs de categorías
+├── transactions/         # Gestión de transacciones
+│   ├── controllers/      # Controladores de transacciones
+│   ├── services/         # Servicios de transacciones
+│   ├── entities/         # Entidad Transaction
+│   └── dto/             # DTOs de transacciones
+├── roles/               # Sistema de roles
+│   ├── enum/            # Enumeraciones de roles
+│   ├── guards/          # Guards de autorización
+│   └── decorators/      # Decoradores de roles
+├── config/              # Configuración
+│   ├── data.source.ts   # Configuración de base de datos
+│   └── base.entity.ts   # Entidad base
+└── main.ts              # Punto de entrada
 ```
 
-## Compile and run the project
+## 🗄️ Modelo de Datos
 
-```bash
-# development
-$ npm run start
+### Usuarios (Users)
+- `id`: UUID (clave primaria)
+- `username`: Nombre de usuario único
+- `email`: Email único
+- `password`: Contraseña encriptada
+- `role`: Rol del usuario (USER/ADMIN)
+- `createdAt`: Fecha de creación
+- `updatedAt`: Fecha de actualización
 
-# watch mode
-$ npm run start:dev
+### Categorías (Categories)
+- `id`: UUID (clave primaria)
+- `name`: Nombre de la categoría
+- `type`: Tipo (ingreso, gasto, transferencia, inversión, deuda, ahorro, otro)
+- `description`: Descripción opcional
+- `isDefault`: Si es categoría por defecto
+- `isActive`: Si está activa
+- `userId`: Usuario propietario
+- `parentId`: Categoría padre (jerarquía)
 
-# production mode
-$ npm run start:prod
+### Transacciones (Transactions)
+- `id`: UUID (clave primaria)
+- `amount`: Monto de la transacción
+- `currency`: Moneda
+- `description`: Descripción opcional
+- `userId`: Usuario propietario
+- `categoryId`: Categoría asociada
+- `createdAt`: Fecha de creación
+- `updatedAt`: Fecha de actualización
+
+## 🔐 Autenticación y Autorización
+
+### JWT Authentication
+- Tokens almacenados en cookies HTTP-only
+- Expiración configurable (2 horas por defecto)
+- Estrategia `jwt-cookie` para validación
+
+### Roles
+- **USER**: Usuario estándar con acceso a sus propios datos
+- **ADMIN**: Administrador con acceso completo
+
+### Guards
+- `AuthGuard('jwt-cookie')`: Protege rutas que requieren autenticación
+- `RolesGuard`: Valida roles de usuario
+
+## 📡 API Endpoints
+
+### Autenticación
+```
+POST /api/auth/register    # Registrar nuevo usuario
+POST /api/auth/login       # Iniciar sesión
 ```
 
-## Run tests
-
-```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+### Usuarios
+```
+GET    /api/users          # Obtener todos los usuarios
+GET    /api/users/:id      # Obtener usuario por ID
+POST   /api/users          # Crear usuario
+PATCH  /api/users/:id      # Actualizar usuario
+DELETE /api/users/:id      # Eliminar usuario
 ```
 
-## Deployment
-
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
-
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
-
-```bash
-$ npm install -g mau
-$ mau deploy
+### Categorías
+```
+GET    /api/categories                    # Obtener categorías del usuario
+POST   /api/categories/user              # Crear categoría padre (ADMIN)
+POST   /api/categories/personal          # Crear categoría personal
+GET    /api/categories/personal/:id      # Obtener categoría personal
+PATCH  /api/categories/personal/:id      # Actualizar categoría personal
+PATCH  /api/categories/personal/:id/active # Activar/desactivar categoría
+DELETE /api/categories/:id               # Eliminar categoría
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+### Transacciones
+```
+GET    /api/transactions                 # Obtener todas las transacciones
+GET    /api/transactions/:id             # Obtener transacción por ID
+GET    /api/transactions/category/:categoryId # Obtener transacciones por categoría
+POST   /api/transactions                 # Crear transacción
+PATCH  /api/transactions/:id             # Actualizar transacción
+DELETE /api/transactions/:id             # Eliminar transacción
+```
 
-## Resources
+## 🚀 Instalación y Configuración
 
-Check out a few resources that may come in handy when working with NestJS:
+### Prerrequisitos
+- Node.js (versión 18 o superior)
+- npm o yarn
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+### Instalación
 
-## Support
+1. **Clonar el repositorio**
+```bash
+git clone git@github.com:jhossweb/app-finanzas-personals.git
+cd app-finanzas-personals
+```
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+2. **Instalar dependencias**
+```bash
+npm install
+```
 
-## Stay in touch
+3. **Configurar variables de entorno**
+```bash
+# Copiar el archivo de ejemplo
+cp .develop.env .env
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+# Editar las variables según tu entorno
+APP_PORT=8100
+DATABASE='databases/database.db'
+API_PREFIX='api'
+JWT_SECRET='tu-secreto-jwt'
+JWT_EXPIRES_IN='2h'
+```
 
-## License
+4. **Ejecutar migraciones**
+```bash
+npm run m:run
+```
 
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+5. **Iniciar el servidor**
+```bash
+# Desarrollo
+npm run start:dev
+
+# Producción
+npm run start:prod
+```
+
+## 📝 Scripts Disponibles
+
+```bash
+# Desarrollo
+npm run start:dev          # Servidor en modo desarrollo
+npm run start:debug        # Servidor con debug
+
+# Producción
+npm run build              # Compilar proyecto
+npm run start:prod         # Ejecutar en producción
+
+
+
+# Base de datos
+npm run m:gen              # Generar migración
+npm run m:run              # Ejecutar migraciones
+npm run m:revert           # Revertir última migración
+npm run m:show             # Mostrar migraciones
+
+# Linting y formateo
+npm run lint               # Linting con ESLint
+npm run format             # Formateo con Prettier
+```
+
+## 🔧 Configuración de Base de Datos
+
+### SQLite
+- Base de datos: `databases/database.db`
+- Migraciones: `databases/migrations/`
+- Configuración: `src/config/data.source.ts`
+
+### Migraciones
+```bash
+# Generar nueva migración
+npm run m:gen -- -n NombreMigracion
+
+# Ejecutar migraciones pendientes
+npm run m:run
+
+# Revertir última migración
+npm run m:revert
+```
+
+
+
+## 🔒 Seguridad
+
+- **JWT Tokens**: Almacenados en cookies HTTP-only
+- **Encriptación**: Contraseñas encriptadas con bcryptjs
+- **Validación**: DTOs con class-validator
+- **CORS**: Configurado para prevenir ataques CSRF
+- **Roles**: Sistema de autorización basado en roles
+
+## 📊 Características Principales
+
+### Gestión de Categorías
+- Categorías jerárquicas (padre/hijo)
+- Tipos de categorías: ingreso, gasto, transferencia, inversión, deuda, ahorro, otro
+- Categorías por defecto y personalizadas
+- Activación/desactivación de categorías
+
+### Gestión de Transacciones
+- Registro de transacciones con montos y monedas
+- Asociación con categorías
+- Filtrado por categorías
+- Validación de datos
+
+### Sistema de Usuarios
+- Registro e inicio de sesión
+- Roles de usuario (USER/ADMIN)
+- Gestión de perfiles
+- Autenticación JWT
+
+

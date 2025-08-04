@@ -4,6 +4,8 @@ import { BaseEntity } from "../../config/base.entity";
 import { CategoryEntity } from "../../categories/entities/category.entity";
 import { TransactionEntity } from "../../transactions/entities/transaction.entity";
 
+import { Role } from "../../roles/enum/role.enum";
+
 @Entity({ name: 'users' })
 export class UserEntity extends BaseEntity
 {
@@ -30,6 +32,12 @@ export class UserEntity extends BaseEntity
     })
     password: string;
 
+    @Column({
+        type: 'text',
+        enum: Role,
+        default: Role.USER,
+    })
+    role: Role;
     
     @OneToMany(
         () => CategoryEntity, 

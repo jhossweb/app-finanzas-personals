@@ -1,27 +1,22 @@
-import { Injectable } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
-import { Request } from "express";
-import { ExtractJwt, Strategy } from "passport-jwt";
-import { JwtPayload } from "../interfaces/jwt.payload";
-import { jwtConstants } from "@/auth/constants/constant";
+import { Strategy } from "passport-jwt";
+import { JwtPayload } from "jsonwebtoken";
+import { Role } from "@/roles/enum/role.enum";
 
-@Injectable()
-export class JwtCookieStrategy  extends PassportStrategy(Strategy, 'jwt-cookie') {
-  constructor() {
+export class JwtCookieStrategy extends PassportStrategy(Strategy, 'jwt-cookie') {
+  constructor(
+  ) {
     super({
-        jwtFromRequest: ExtractJwt.fromExtractors([
-            (req: Request) => req.cookies?.token, // Extract JWT from cookies
-            ExtractJwt.fromAuthHeaderAsBearerToken(), // Extract JWT from Authorization header
-            ExtractJwt.fromUrlQueryParameter('token'), // Extract JWT from URL query parameter
-            ExtractJwt.fromHeader('authorization'), // Extract JWT from custom header
-            ExtractJwt.fromBodyField('token') // Extract JWT from body field
-        ]),
-        ignoreExpiration: false,
-        secretOrKey: jwtConstants.secret, // Use the secret defined in jwtConstants
-    })
+      jwtFromRequest: (req) => {
+        const token = req.cookies['token'] || req.headers.authorization?.split(' ')[1];
+        return token;
+      },
+      ignoreExpiration: false,
+      secretOrKey: process.env.JWT_SECRET,
+    });
   }
 
-  async validate(payload: JwtPayload): Promise<{id: string, username: string, email: string}> {
-    return { id: payload.id, username: payload.username, email: payload.email };
+  async validate(payload: JwtPayload): Promise<{id: string, username: string, email: string, role: Role}> {
+    return { id: payload.id, username: payload.username, email: payload.email, role: payload.role };
   }
 }

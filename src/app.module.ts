@@ -10,7 +10,7 @@ import { TransactionsModule } from './transactions/transactions.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
-      envFilePath: `${process.env.NODE_ENV === 'develop' ? '.develop.env' : '.env'}`,
+      envFilePath: '.develop.env',
       isGlobal: true,
     }),
     TypeOrmModule.forRoot({ ...DataSourceConfig }),

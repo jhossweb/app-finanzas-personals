@@ -12,14 +12,14 @@ export class AuthService {
     private readonly jwtService: JwtService
   ) {}
 
-  async register({ username, email, password }: CreateAuthDto) {
+  async register({ username, email, password, role }: CreateAuthDto) {
     const userByEmail = await this.userService.findByEmail(email);
     if (userByEmail) throw new BadRequestException(`Email ${email} is already in use`);
 
     const userByUsername = await this.userService.findByUsername(username);
     if (userByUsername) throw new BadRequestException(`Username ${username} is already in use`);
 
-    return this.userService.create({ username, email, password });
+    return this.userService.create({ username, email, password, role });
 
   }
 
@@ -48,7 +48,7 @@ export class AuthService {
       throw new BadRequestException('Invalid credentials');
     }
 
-    const payload = { id: user.id, username: user.username, email: user.email };
+    const payload = { id: user.id, username: user.username, email: user.email, role: user.role };
     const token = await this.jwtService.signAsync(payload);
 
     return {

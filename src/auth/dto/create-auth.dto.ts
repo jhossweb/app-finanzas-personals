@@ -1,4 +1,5 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength } from "class-validator";
+import { Role } from "@/roles/enum/role.enum";
+import { IsEmail, IsEnum, IsNotEmpty, IsString, MinLength } from "class-validator";
 
 export class CreateAuthDto 
 {
@@ -16,6 +17,9 @@ export class CreateAuthDto
     @IsNotEmpty()
     @MinLength(6)
     password: string;
+
+    @IsEnum(Role, { message: 'Rol inválido' })
+    role: Role;
 }
 
 

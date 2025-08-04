@@ -9,7 +9,7 @@ async function bootstrap() {
 
   const configService = app.get(ConfigService);
   app.setGlobalPrefix(configService.get<string>('API_PREFIX') || 'api');
-
+console.log(process.env.JWT_SECRET)
   await app.listen(configService.get<number>('APP_PORT') || 3000);
   console.log(`Application is running on: ${await app.getUrl()}`);
   
