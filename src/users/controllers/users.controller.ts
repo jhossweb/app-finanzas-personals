@@ -10,6 +10,7 @@ export class UsersController {
   @Post()
   @UsePipes(new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }))
   create(@Body() createUserDto: CreateUserDto) {
+   
     return this.usersService.create(createUserDto);
   }
 

@@ -2,14 +2,18 @@ import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ConfigService } from '@nestjs/config';
 import * as cookieParser from 'cookie-parser';
+import { CORS } from './constants';
+import { doubleCsrf } from 'csrf-csrf'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.enableCors(CORS);
   app.use(cookieParser())
-
+ 
+  
   const configService = app.get(ConfigService);
   app.setGlobalPrefix(configService.get<string>('API_PREFIX') || 'api');
-console.log(process.env.JWT_SECRET)
+
   await app.listen(configService.get<number>('APP_PORT') || 3000);
   console.log(`Application is running on: ${await app.getUrl()}`);
   

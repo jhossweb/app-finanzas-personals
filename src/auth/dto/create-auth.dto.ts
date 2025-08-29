@@ -1,5 +1,5 @@
 import { Role } from "@/roles/enum/role.enum";
-import { IsEmail, IsEnum, IsNotEmpty, IsString, MinLength } from "class-validator";
+import { IsEmail, IsEnum, IsNotEmpty, IsString, MinLength, ValidateIf } from "class-validator";
 
 export class CreateAuthDto 
 {
@@ -25,10 +25,12 @@ export class CreateAuthDto
 
 export class LoginAuthDto 
 {
+    @ValidateIf( o => !o.username )
     @IsString()
     @IsEmail()
     email?: string;
-
+    
+    @ValidateIf( o => !o.email )
     @IsString()
     username?: string;
 

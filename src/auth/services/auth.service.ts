@@ -19,7 +19,7 @@ export class AuthService {
     const userByUsername = await this.userService.findByUsername(username);
     if (userByUsername) throw new BadRequestException(`Username ${username} is already in use`);
 
-    return this.userService.create({ username, email, password, role });
+    return await this.userService.create({ username, email, password, role });
 
   }
 

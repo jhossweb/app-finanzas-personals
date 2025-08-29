@@ -6,7 +6,7 @@ import { AuthService } from '../services/auth.service';
 import { CreateAuthDto, LoginAuthDto } from '../dto/create-auth.dto';
 
 
-@Controller('auth/')
+@Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
@@ -27,7 +27,8 @@ export class AuthController {
     res.cookie('token', token, {
       httpOnly: true,
       secure: false, 
-      sameSite: 'strict', // Prevent CSRF attacks
+      sameSite: 'lax', // Prevent CSRF attacks
+      domain: 'localhost', // Adjust domain as needed
     });
     return { user };
   }

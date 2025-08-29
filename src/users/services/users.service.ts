@@ -17,8 +17,14 @@ export class UsersService {
     private readonly userRepository: Repository<UserEntity>,
   ){}
 
-  findAll() {
-    return `This action returns all users`;
+  async findAll() {
+    try {
+      const users = await this.userRepository.find();
+      if (!users) throw new NotFoundException('No users found');
+      return users;
+    } catch (error) {
+      throw new InternalServerErrorException(`Error retrieving users: ${error.message}`);
+    }
   }
 
   async findOne(id: string): Promise<UserEntity | string> {
