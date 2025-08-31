@@ -57,6 +57,12 @@ export class CategoriesController {
   }
 
   /* Category Person */
+  @Get('personal')
+  async findCategoryPersonal(@Req() req: Request) {
+    const user = req.user as UserEntity
+    return await this.categoriesService.findAllCategoryChildren(user.id);
+  }
+
   @Get('personal/:id')
   findOne(
     @Param('id') id: string,

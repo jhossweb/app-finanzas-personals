@@ -16,13 +16,14 @@ export class TransactionsController {
   constructor(private readonly transactionsService: TransactionsService) {}
   
   @Post()
-  create(
+  async create(
     @Body() createTransactionDto: CreateTransactionDto,
     //@CurrentUser('token') user: { id: string }
     @Req() req: Request
   ) {
     const user = req.user as UserEntity
-    return this.transactionsService.create(createTransactionDto, user.id) ;
+    
+    return await this.transactionsService.create(createTransactionDto, user.id) ;
   }
 
   @Get()

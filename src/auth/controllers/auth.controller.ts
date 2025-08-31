@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, Res } from '@nestjs/common';
-import { Response } from 'express';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, HttpStatus, Res, Req, UseGuards } from '@nestjs/common';
+import { Request, Response } from 'express';
 
 
 import { AuthService } from '../services/auth.service';
 import { CreateAuthDto, LoginAuthDto } from '../dto/create-auth.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 
 @Controller('auth')
@@ -31,6 +32,15 @@ export class AuthController {
       domain: 'localhost', // Adjust domain as needed
     });
     return { user };
+  }
+
+
+  // auth.controller.ts
+  @Get('verify')
+  @UseGuards(AuthGuard('jwt-cookie'))
+
+  async verify( @Req() req: Request) {
+    return req.user; // Devuelve los datos del usuario si la cookie es válida
   }
 
 }

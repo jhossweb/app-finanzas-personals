@@ -21,9 +21,11 @@ export class TransactionsService {
     private readonly categoryService: CategoriesService
   ) {}
 
-  async create(dataDto: CreateTransactionDto, user_id: string): Promise<TransactionEntity> {
+  async create(dataDto: CreateTransactionDto, user_id: string)//: Promise<TransactionEntity> 
+  {
 
     const category = await this.categoryService.findOneCategoryPersonal(String(dataDto.category_id));
+  
     if (!category) throw new NotFoundException(`Category with ID ${dataDto.category_id} not found`);
 
     const transaction = this.transactionRepository.create({

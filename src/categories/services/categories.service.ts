@@ -72,6 +72,12 @@ export class CategoriesService {
     return await this.categoryRepository.save(newCategory);
   }
 
+  async findCateogryParent(): Promise<CategoryEntity[]> {
+    return await this.categoryRepository.find({
+      where: { isDefault: true, parent: IsNull() }
+    });
+  }
+
   
   
   async findAllCategoryChildren(user_id: string): Promise<CategoryEntity[]> {
