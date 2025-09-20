@@ -171,17 +171,28 @@ export class TransactionsService {
     }
 
     // Método para el recuadro "Transacciones Recientes"
-    async getRecentTransactions(userId: string) {
+
+   async getRecentTransactions(userId: string) {
       try {
-        const transactions = await this.transactionRepository.find({
-          where: { user_id: { id: userId } },
-          order: { createdAt: 'DESC' },
-          take: 5, // Limitar a las 5 transacciones más recientes
-        });
+        const transactions = await this.transactionRepository
+          .createQueryBuilder('transaction')
+          .leftJoin('transaction.category_id', 'category') // Usamos leftJoin si no necesitas todas las columnas de category
+          .select([
+            'transaction.id',
+            'transaction.amount',
+            'transaction.createdAt',
+            'transaction.description',
+            'category.name', // Solo esta columna de la categoría
+            'category.type', // Solo esta columna de la categoría
+          ])
+          .where('transaction.user_id = :userId', { userId })
+          .orderBy('transaction.createdAt', 'DESC')
+          .take(5)
+          .getRawMany(); // getRawMany para obtener solo los campos seleccionados
+
         return transactions;
-      
-       
       } catch (error) {
+        console.error('Error fetching recent transactions:', error);
         throw new Error('Failed to fetch transactions');
       }
     }
