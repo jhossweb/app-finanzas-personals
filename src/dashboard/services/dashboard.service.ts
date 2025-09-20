@@ -36,10 +36,14 @@ export class DashboardService {
 
     const totalIngreso = await this.transactionsService.getTotalIngresos(user_id);
     const totalGasto = await this.transactionsService.getTotalGastos(user_id);
+    console.log(totalIngreso)
     const transactionsByCategory = await this.transactionsService.getTransactionsByCategory(user_id);
 
     const totalTransactions = await this.transactionsService.getTotalTransactionCount(user_id);
     const recentTransactions = await this.transactionsService.getRecentTransactions(user_id);
+
+    const gastosByCategory = await this.transactionsService.getGastoByCategory(user_id);
+
 
     const balance = totalIngreso - totalGasto;
 
@@ -49,7 +53,8 @@ export class DashboardService {
       balance,
       transactionsByCategory,
       totalTransactions,
-      recentTransactions
+      recentTransactions,
+      gastosByCategory
     }
   }
 }

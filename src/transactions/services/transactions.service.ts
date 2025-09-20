@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DeleteResult, Repository, UpdateResult } from 'typeorm';
 
@@ -7,6 +7,7 @@ import { UpdateTransactionDto } from '../dto/update-transaction.dto';
 import { TransactionEntity } from '../entities/transaction.entity';
 import { CategoriesService } from '@/categories/services/categories.service';
 import { NotFoundError } from 'rxjs';
+import { parse } from 'path';
 
 
 
@@ -21,7 +22,7 @@ export class TransactionsService {
     private readonly categoryService: CategoriesService
   ) {}
 
-  async create(dataDto: CreateTransactionDto, user_id: string)//: Promise<TransactionEntity> 
+  async create(dataDto: CreateTransactionDto, user_id: string): Promise<TransactionEntity> 
   {
 
     const category = await this.categoryService.findOneCategoryPersonal(String(dataDto.category_id));
@@ -85,4 +86,154 @@ export class TransactionsService {
       throw new Error('Failed to delete transaction');
     }
   }
+
+ 
+
+  /**
+   * Información para el dashboard
+   */
+
+    async getTransactionsByUser(userId: string): Promise<TransactionEntity[]> {
+
+      try {
+
+        const transactions = await this.transactionRepository.find({
+          where: { user_id: { id: userId } },
+          relations: ['user_id', 'category_id'],
+        });
+
+        if (!transactions) throw new BadRequestException('No transactions found for the user');
+
+        return transactions;
+
+      } catch (error) {
+        console.error('Error fetching transactions:', error);
+        throw new Error('Failed to fetch transactions');
+      }
+
+    }
+
+    async getTotalIngresos(userId: string): Promise<number> {
+        try {
+          const result = await this.transactionRepository
+            .createQueryBuilder('transaction')
+            .leftJoin('transaction.category_id', 'category') // Asumiendo que la relación se llama 'category'*
+            .select('SUM(transaction.amount)', 'total')
+            .where('transaction.user_id = :userId', { userId })
+            .andWhere('category.type = :type', { type: 'INGRESOS' })
+            .getRawOne();
+            console.log(result)
+      
+
+          return parseFloat(result?.total) || 0;
+
+        } catch (error) {
+          console.error('Error fetching total ingresos:', error);
+          throw new Error('Failed to fetch transactions');
+        }
+      }
+
+
+    async getTotalGastos(userId: string): Promise<number> {
+      try {
+
+        const result = await this.transactionRepository
+                      .createQueryBuilder('transaction')
+                     .leftJoin('transaction.category_id', 'category')
+                     .select([
+                        'transaction.amount',
+                        'transaction.description',
+                        'transaction.date',
+                        'category.name', // Seleccionamos el nombre de la categoría a través del alias
+                      ])
+                      .where('transaction.user_id = :userId', { userId })
+                      .andWhere('category.type = :type', { type: 'GASTOS' })
+                      .select('SUM(transaction.amount)', 'total')
+                      .getRawOne();
+
+        return parseFloat(result.total)  || 0  
+                      
+
+      } catch (error) {
+        throw new Error('Failed to fetch transactions');
+      }
+    }
+
+    async getTotalTransactionCount(userId: string): Promise<number> {
+      try {
+        const count = await this.transactionRepository.count({
+          where: { user_id: { id: userId } },
+        });
+        return count;
+      } catch (error) {
+        throw new Error('Failed to fetch transactions');
+      }
+    }
+
+    // Método para el recuadro "Transacciones Recientes"
+    async getRecentTransactions(userId: string) {
+      try {
+        const transactions = await this.transactionRepository.find({
+          where: { user_id: { id: userId } },
+          order: { createdAt: 'DESC' },
+          take: 5, // Limitar a las 5 transacciones más recientes
+        });
+        return transactions;
+      
+       
+      } catch (error) {
+        throw new Error('Failed to fetch transactions');
+      }
+    }
+
+    async getGastoByCategory(userId: string) {
+      try {
+        const result = await this.transactionRepository
+          .createQueryBuilder('transaction')
+          .leftJoinAndSelect('transaction.category_id', 'category')
+          .where('transaction.user_id = :userId', { userId })
+          .andWhere('category.type = :type', { type: 'GASTOS' })
+          .select('category.name', 'categoryName')
+          .addSelect('SUM(transaction.amount)', 'total')
+          .groupBy('category.name')
+          .getRawMany();
+
+          return result.map(row => ({
+            category: row.categoryName,
+            total: parseFloat(row.total)
+          }))
+
+      } catch (error) {
+        throw new Error('Failed to fetch transactions');
+      }
+    }
+
+    async getTransactionsByCategory(userId: string) {
+
+      try {
+        const result = await this.transactionRepository
+          .createQueryBuilder('transaction')
+          .leftJoinAndSelect('transaction.category_id', 'category')
+          .select('category.name', 'categoryName')
+          .addSelect('category.type', 'categoryType')
+          .addSelect('SUM(transaction.amount)', 'total')
+          .where('transaction.user_id = :userId', { userId })
+          .groupBy('category.name')
+          .addGroupBy('category.type')
+          .getRawMany();
+          
+          if(!result) throw new BadRequestException('No transactions found for the user');
+
+          return result.map(row => ({
+            category: row.categoryName,
+            type: row.categoryType,
+            total: parseFloat(row.total)
+          }))
+          
+      } catch (error) {
+        throw new Error('Failed to fetch transactions');
+      }
+
+    }
+
 }

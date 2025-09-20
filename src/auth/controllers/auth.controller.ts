@@ -28,11 +28,41 @@ export class AuthController {
     res.cookie('token', token, {
       httpOnly: true,
       secure: false, 
-      sameSite: 'lax', // Prevent CSRF attacks
-      domain: 'localhost', // Adjust domain as needed
+      sameSite: 'lax',
+      domain: 'localhost', 
     });
     return { user };
   }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   // auth.controller.ts

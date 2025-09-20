@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Res, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, Res, Req, Put } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Request } from 'express';
 
@@ -18,7 +18,6 @@ export class TransactionsController {
   @Post()
   async create(
     @Body() createTransactionDto: CreateTransactionDto,
-    //@CurrentUser('token') user: { id: string }
     @Req() req: Request
   ) {
     const user = req.user as UserEntity
@@ -27,14 +26,9 @@ export class TransactionsController {
   }
 
   @Get()
-  findAll() {
-    
-    return this.transactionsService.findAll();
-  }
-
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.transactionsService.findOne(+id);
+  findByUser(@Req() req: Request) {
+    const user = req.user as UserEntity;
+    return this.transactionsService.findByUser(user.id);
   }
 
   @Get('category/:categoryId')
@@ -42,7 +36,7 @@ export class TransactionsController {
     return await this.transactionsService.findByCategory(categoryId);
   }
 
-  @Patch(':id')
+  @Put(':id')
   update(@Param('id') id: string, @Body() updateTransactionDto: UpdateTransactionDto, @Req() req: Request) {
     const user = req.user as UserEntity;
     return this.transactionsService.update(id, updateTransactionDto, user.id);
