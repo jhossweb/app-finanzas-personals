@@ -13,7 +13,7 @@ export class EnvelopeEnity extends BaseEntity
     description?: string;
 
     @Column({ type: "decimal", precision: 10, scale: 2, nullable: false })
-    envelpe_amount: number;
+    envelope_amount: number;
 
     @Column({ type: "boolean", default: true })
     is_active: boolean;

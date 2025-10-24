@@ -26,7 +26,7 @@ export class TransactionEntity extends BaseEntity
 
 
     // relations envelope
-    @ManyToOne( () => EnvelopeEnity, envelope => envelope.transactions, { nullable: true, onUpdate: 'RESTRICT' })
+    @ManyToOne( () => EnvelopeEnity, envelope => envelope.transactions, { nullable: false, onUpdate: 'RESTRICT' })
     @JoinColumn({ name: 'envelope_id' })
     envelope: EnvelopeEnity;
 
