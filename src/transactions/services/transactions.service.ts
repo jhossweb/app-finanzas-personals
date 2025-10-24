@@ -202,9 +202,17 @@ export class TransactionsService {
         const result = await this.transactionRepository
           .createQueryBuilder('transaction')
           .leftJoinAndSelect('transaction.category_id', 'category')
+          .select([
+            'transaction.id',
+            'transaction.amount',
+            'transaction.createdAt',
+            'transaction.description',
+            'category.name', // Solo esta columna de la categoría
+            'category.type', // Solo esta columna de la categoría
+          ])
           .where('transaction.user_id = :userId', { userId })
           .andWhere('category.type = :type', { type: 'GASTOS' })
-          .select('category.name', 'categoryName')
+         
           .addSelect('SUM(transaction.amount)', 'total')
           .groupBy('category.name')
           .getRawMany();
@@ -227,6 +235,8 @@ export class TransactionsService {
           .leftJoinAndSelect('transaction.category_id', 'category')
           .select('category.name', 'categoryName')
           .addSelect('category.type', 'categoryType')
+          .addSelect('transaction.description', 'description')
+          .addSelect('transaction.createdAt', 'categoryType')
           .addSelect('SUM(transaction.amount)', 'total')
           .where('transaction.user_id = :userId', { userId })
           .groupBy('category.name')

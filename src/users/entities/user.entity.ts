@@ -5,6 +5,7 @@ import { CategoryEntity } from "../../categories/entities/category.entity";
 import { TransactionEntity } from "../../transactions/entities/transaction.entity";
 
 import { Role } from "../../roles/enum/role.enum";
+import { EnvelopeEnity } from "../../envelopes/entities/envelope.entity";
 
 @Entity({ name: 'users' })
 export class UserEntity extends BaseEntity
@@ -50,5 +51,11 @@ export class UserEntity extends BaseEntity
         (transaction) => transaction.user_id,
     )
     transactions: TransactionEntity[];
+
+    @OneToMany(
+        () => EnvelopeEnity,
+        (envelope) => envelope.user_id
+    )
+    envelopes: EnvelopeEnity[];
 
 }
