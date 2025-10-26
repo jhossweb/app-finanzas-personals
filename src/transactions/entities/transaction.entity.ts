@@ -30,6 +30,4 @@ export class TransactionEntity extends BaseEntity
     @JoinColumn({ name: 'envelope_id' })
     envelope: EnvelopeEnity;
 
-    @Column({ type: "uuid", nullable: true })
-    envelope_id: string;
 }

@@ -7,12 +7,14 @@ import { AuthController } from './controllers/auth.controller';
 import { UsersModule } from '../users/users.module';
 import { JwtCookieStrategy } from './strategies/jwt-cookie.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
+import { EnvelopesModule } from '@/envelopes/envelopes.module';
 
 
 @Module({
   imports: [
     ConfigModule,
     UsersModule,
+    EnvelopesModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({

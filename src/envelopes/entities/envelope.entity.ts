@@ -18,6 +18,10 @@ export class EnvelopeEnity extends BaseEntity
     @Column({ type: "boolean", default: true })
     is_active: boolean;
 
+    @Column({ type: "boolean", default: false })
+    is_main: boolean;
+
+
     // Relations with User
     @ManyToOne( () => UserEntity, (user) => user.envelopes, { nullable: false, onDelete: "CASCADE" } )
     @JoinColumn({ name: "user_id" })

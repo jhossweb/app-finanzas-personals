@@ -7,6 +7,7 @@ import { UpdateUserDto } from '../dto/update-user.dto';
 
 import * as bcrypt from 'bcryptjs';
 import { UserEntity } from '../entities/user.entity';
+import { EnvelopeEnity } from '@/envelopes/entities/envelope.entity';
 
 
 @Injectable()
@@ -15,6 +16,7 @@ export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+
   ){}
 
   async findAll() {
@@ -99,4 +101,6 @@ export class UsersService {
   remove(id: number) {
     return `This action removes a #${id} user`;
   }
+
+
 }

@@ -1,15 +1,18 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards } from '@nestjs/common';
 import { EnvelopesService } from '@/envelopes/services/envelopes.service';
 import { CreateEnvelopeDto } from '@/envelopes/dto/create-envelope.dto';
 import { UpdateEnvelopeDto } from '@/envelopes/dto/update-envelope.dto';
+import { AuthGuard } from '@nestjs/passport';
+
 
 @Controller('envelopes')
+@UseGuards(AuthGuard('jwt-cookie')) // Ensure that all routes are protected by JWT authentication 
 export class EnvelopesController {
   constructor(private readonly envelopesService: EnvelopesService) {}
 
   @Post()
   create(@Body() createEnvelopeDto: CreateEnvelopeDto) {
-    return this.envelopesService.create(createEnvelopeDto);
+    //return this.envelopesService.create(createEnvelopeDto);
   }
 
   @Get()
@@ -19,7 +22,8 @@ export class EnvelopesController {
 
   @Get(':id')
   findOne(@Param('id') id: string) {
-    return this.envelopesService.findOne(+id);
+  
+    return this.envelopesService.findEnvelopeByUserId(id);
   }
 
   @Patch(':id')

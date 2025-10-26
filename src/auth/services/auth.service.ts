@@ -3,14 +3,19 @@ import { JwtService } from '@nestjs/jwt';
 
 import { CreateAuthDto, LoginAuthDto } from '../dto/create-auth.dto';
 import { UsersService } from '../../users/services/users.service';
+import { EnvelopesService } from '@/envelopes/services/envelopes.service';
 
 @Injectable()
 export class AuthService {
 
   constructor(
     private readonly userService: UsersService,
+    private readonly envelopeService: EnvelopesService,
     private readonly jwtService: JwtService
   ) {}
+
+
+
 
   async register({ username, email, password, role }: CreateAuthDto) {
     const userByEmail = await this.userService.findByEmail(email);
@@ -19,7 +24,15 @@ export class AuthService {
     const userByUsername = await this.userService.findByUsername(username);
     if (userByUsername) throw new BadRequestException(`Username ${username} is already in use`);
 
-    return await this.userService.create({ username, email, password, role });
+    const user = await this.userService.create({ username, email, password, role });
+
+    await this.envelopeService.create({
+      name: "Principal",
+      description: "Sobre Principal",
+      envelope_amount: 0,
+      is_main: true,
+      user_id: user.id,
+    })
 
   }
 

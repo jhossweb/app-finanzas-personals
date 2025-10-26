@@ -102,7 +102,7 @@ export class CategoriesService {
 
   async findOneCategoryPersonal(id: string): Promise<CategoryEntity> {
     const category = await this.categoryRepository.findOne({
-      where: { id, isDefault: false },
+      where: { id },
       relations: ['user'],
     });
 

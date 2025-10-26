@@ -2,6 +2,7 @@ import { PartialType } from '@nestjs/mapped-types';
 import { CreateTransactionDto } from './create-transaction.dto';
 import { IsDecimal, IsOptional, IsString, IsUUID } from 'class-validator';
 import { CategoryEntity } from '@/categories/entities/category.entity';
+import { EnvelopeEnity } from '@/envelopes/entities/envelope.entity';
 
 export class UpdateTransactionDto extends PartialType(CreateTransactionDto) {
 
@@ -16,5 +17,9 @@ export class UpdateTransactionDto extends PartialType(CreateTransactionDto) {
     @IsOptional()
     @IsUUID()
     category_id?: CategoryEntity;
+
+    @IsString()
+    @IsUUID()
+    envelope_id?: EnvelopeEnity;
 
 }

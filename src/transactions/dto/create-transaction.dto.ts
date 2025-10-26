@@ -1,6 +1,7 @@
 import { IsCurrency, IsDecimal, IsEmpty, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
 import { CategoryEntity } from "../../categories/entities/category.entity";
 import { UserEntity } from "../../users/entities/user.entity";
+import { EnvelopeEnity } from "@/envelopes/entities/envelope.entity";
 
 export class CreateTransactionDto 
 {
@@ -19,4 +20,8 @@ export class CreateTransactionDto
     @IsString()
     @IsUUID()
     category_id: CategoryEntity;
+
+    @IsString()
+    @IsUUID()
+    envelope_id: EnvelopeEnity;
 }

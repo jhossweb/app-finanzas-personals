@@ -1,4 +1,4 @@
-import { IsDecimal, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
+import { IsBoolean, IsDecimal, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class CreateEnvelopeDto {
     @IsString()
@@ -13,7 +13,13 @@ export class CreateEnvelopeDto {
     @IsNotEmpty()
     envelope_amount: number
 
+    @IsBoolean()
+    @IsOptional()
+    is_main?: boolean;
+
+
     @IsUUID()
     @IsNotEmpty()
     user_id: string
 }
+

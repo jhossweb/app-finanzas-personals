@@ -8,6 +8,7 @@ import { TransactionEntity } from '../entities/transaction.entity';
 import { CategoriesService } from '@/categories/services/categories.service';
 import { NotFoundError } from 'rxjs';
 import { parse } from 'path';
+import { EnvelopesService } from '@/envelopes/services/envelopes.service';
 
 
 
@@ -19,20 +20,24 @@ export class TransactionsService {
     @InjectRepository(TransactionEntity)
     private readonly transactionRepository: Repository<TransactionEntity>,
 
-    private readonly categoryService: CategoriesService
+    private readonly categoryService: CategoriesService,
+    private readonly envelopeService: EnvelopesService
   ) {}
 
   async create(dataDto: CreateTransactionDto, user_id: string): Promise<TransactionEntity> 
   {
 
     const category = await this.categoryService.findOneCategoryPersonal(String(dataDto.category_id));
-  
     if (!category) throw new NotFoundException(`Category with ID ${dataDto.category_id} not found`);
+
+    const envelope = await this.envelopeService.findEnvelopeByUserId(String(user_id));
+    if (!envelope) throw new NotFoundException(`Envelope with User ID ${user_id} not found`);
 
     const transaction = this.transactionRepository.create({
       ...dataDto,
       user_id: { id: user_id }, // If 'user_id' is a relation, ensure this matches your entity definition
-      category_id: category, // Assign the actual category entity
+      category_id: category, 
+      envelope: envelope
     });
 
     try {
