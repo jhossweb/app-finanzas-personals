@@ -31,7 +31,7 @@ export class AuthService {
       description: "Sobre Principal",
       envelope_amount: 0,
       is_main: true,
-      user_id: user.id,
+      user_id: user
     })
 
   }

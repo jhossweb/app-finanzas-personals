@@ -12,7 +12,7 @@ export class EnvelopeEnity extends BaseEntity
     @Column({ type: "text", nullable: true })
     description?: string;
 
-    @Column({ type: "decimal", precision: 10, scale: 2, nullable: false })
+    @Column({ type: "decimal", precision: 10, scale: 2, nullable: false, default: 0 })
     envelope_amount: number;
 
     @Column({ type: "boolean", default: true })
@@ -25,10 +25,7 @@ export class EnvelopeEnity extends BaseEntity
     // Relations with User
     @ManyToOne( () => UserEntity, (user) => user.envelopes, { nullable: false, onDelete: "CASCADE" } )
     @JoinColumn({ name: "user_id" })
-    user: UserEntity;
-
-    @Column({ type: "uuid", nullable: false })
-    user_id: string;
+    user_id: UserEntity;
 
 
     // relation with transactions 

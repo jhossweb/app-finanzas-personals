@@ -1,3 +1,4 @@
+import { UserEntity } from "@/users/entities/user.entity";
 import { IsBoolean, IsDecimal, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class CreateEnvelopeDto {
@@ -10,7 +11,7 @@ export class CreateEnvelopeDto {
     description: string;
 
     @IsDecimal()
-    @IsNotEmpty()
+    @IsOptional()
     envelope_amount: number
 
     @IsBoolean()
@@ -20,6 +21,6 @@ export class CreateEnvelopeDto {
 
     @IsUUID()
     @IsNotEmpty()
-    user_id: string
+    user_id: UserEntity
 }
 

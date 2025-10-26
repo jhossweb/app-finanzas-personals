@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateEnvelopeDto } from '@/envelopes/dto/create-envelope.dto';
 import { UpdateEnvelopeDto } from '@/envelopes/dto/update-envelope.dto';
-import { In, Repository } from 'typeorm';
+import { In, Repository, Equal, DeleteResult, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EnvelopeEnity } from '../entities/envelope.entity';
 
@@ -23,10 +23,24 @@ export class EnvelopesService {
 
   }
 
+  async createEnvelopeWithUser (dto: CreateEnvelopeDto, userId: string) {
+    const userEnvelope = this.envelopeRepository.create({
+      ...dto,
+      envelope_amount: 0,
+      user_id: { id: userId }
+    })
+
+    try {
+        return await this.envelopeRepository.save(userEnvelope);
+    } catch (error) {
+        throw new Error(`Error creating envelope: ${error.message}`);
+    }
+  }
+
   async findEnvelopeByUserId(id: string): Promise<EnvelopeEnity | null >{
     try {
       const envelopes = await this.envelopeRepository.findOne({
-        where: { user_id: id }
+        where: { user_id: Equal(id) }
       });
 
       console.log(envelopes)
@@ -46,11 +60,37 @@ export class EnvelopesService {
     return `This action returns a #${id} envelope`;
   }
 
-  update(id: number, updateEnvelopeDto: UpdateEnvelopeDto) {
-    return `This action updates a #${id} envelope`;
+  async update(id: string, updateEnvelopeDto: UpdateEnvelopeDto): Promise<UpdateResult | undefined> {
+    
+    try {
+        const envelope: UpdateResult = await this.envelopeRepository.update(id, updateEnvelopeDto);
+
+        if(envelope.affected === 0)
+            throw new NotFoundException(`Envelope with ID ${id} not found`);
+
+        return envelope;
+
+
+    } catch (error) {
+        throw new InternalServerErrorException(`Error updating envelope: ${error.message}`);
+    }
+
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} envelope`;
+  async remove(id: string): Promise<DeleteResult | undefined> {
+    
+      try {
+          
+        const envelope: DeleteResult = await this.envelopeRepository.delete(id);
+        
+        if(envelope.affected === 0) 
+          throw new NotFoundException(`Envelope with ID ${id} not found`);
+
+        return envelope;
+
+      } catch (error) {
+        throw new InternalServerErrorException(`Error deleting envelope: ${error.message}`);
+      }
+
   }
 }
