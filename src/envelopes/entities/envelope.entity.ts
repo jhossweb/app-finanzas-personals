@@ -29,7 +29,10 @@ export class EnvelopeEnity extends BaseEntity
 
 
     // relation with transactions 
-    @OneToMany( () => TransactionEntity, (transaction) => transaction.envelope )
-    transactions: TransactionEntity[];
+    @OneToMany( () => TransactionEntity, (transaction) => transaction.envelope_origin)
+    transactionsAsOrigin: TransactionEntity[];
+
+    @OneToMany( () => TransactionEntity, (transaction) => transaction.envelope_destination)
+    transactionsAsDestination: TransactionEntity[];
 
 }
