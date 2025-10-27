@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { CreateEnvelopeDto } from '@/envelopes/dto/create-envelope.dto';
 import { UpdateEnvelopeDto } from '@/envelopes/dto/update-envelope.dto';
 import { In, Repository, Equal, DeleteResult, UpdateResult } from 'typeorm';
@@ -37,6 +37,8 @@ export class EnvelopesService {
     }
   }
 
+ 
+
   async findEnvelopeByUserId(id: string): Promise<EnvelopeEnity | null >{
     try {
       const envelopes = await this.envelopeRepository.findOne({
@@ -51,6 +53,10 @@ export class EnvelopesService {
       throw new NotFoundException(`Envelope with User ID ${id} not found`);
     }
   }
+
+
+
+
 
   findAll() {
     return `This action returns all envelopes`;

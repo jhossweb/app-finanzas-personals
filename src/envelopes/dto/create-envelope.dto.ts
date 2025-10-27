@@ -2,6 +2,9 @@ import { UserEntity } from "@/users/entities/user.entity";
 import { IsBoolean, IsDecimal, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class CreateEnvelopeDto {
+
+
+    
     @IsString()
     @IsNotEmpty()
     name: string;

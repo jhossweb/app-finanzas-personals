@@ -24,24 +24,51 @@ export class TransactionsService {
     private readonly envelopeService: EnvelopesService
   ) {}
 
-  async create(dataDto: CreateTransactionDto, user_id: string): Promise<TransactionEntity> 
+  // ------------------------------------------------------------------------------------------------
+      // Lógica de Validación (Ayuda a mantener la integridad)
+      // ------------------------------------------------------------------------------------------------
+      private async validateTypeTransaction(dataDto: CreateTransactionDto) {
+        switch (dataDto.type) {
+          case 'income':
+            if(dataDto.envelope_origin) throw new BadRequestException('Envelope origin is not required for income transactions');
+            if(!dataDto.envelope_destination) throw new BadRequestException('Envelope destination is required for income transactions');
+
+            break;
+          case 'expense':
+              if(!dataDto.envelope_origin) throw new BadRequestException("Envelope origin is required for expense transactions")
+              if(dataDto.envelope_destination) throw new BadRequestException("Envelope destination is not required for expense transactions")
+
+                break;
+          case 'transfer':
+              if(!dataDto.envelope_origin || !dataDto.envelope_destination) throw new BadRequestException("The TRANSFER must have an origin and destination envelope.")
+              if(dataDto.envelope_destination === dataDto.envelope_origin) throw new BadRequestException("The origin and destination envelopes cannot be the same.")
+              break;
+        }
+      
+    }
+
+  async create(dataDto: CreateTransactionDto, user_id: string) 
   {
 
     const category = await this.categoryService.findOneCategoryPersonal(String(dataDto.category_id));
     if (!category) throw new NotFoundException(`Category with ID ${dataDto.category_id} not found`);
-
-    const envelope = await this.envelopeService.findEnvelopeByUserId(String(user_id));
-    if (!envelope) throw new NotFoundException(`Envelope with User ID ${user_id} not found`);
-
+    
+    await this.validateTypeTransaction(dataDto);
+    
     const transaction = this.transactionRepository.create({
       ...dataDto,
-      user_id: { id: user_id }, // If 'user_id' is a relation, ensure this matches your entity definition
-      category_id: category, 
-      envelope: envelope
+      user_id: { id: user_id }, // Ensure user_id matches the expected type
+      category_id: category,
+      envelope_origin: dataDto.envelope_origin ? { id: dataDto.envelope_origin } : undefined,
+      envelope_destination: dataDto.envelope_destination ? { id: dataDto.envelope_destination } : undefined,
     });
 
+    
     try {
-      return await this.transactionRepository.save(transaction);
+      
+      const savedTransaction = await this.transactionRepository.save(transaction);
+      return savedTransaction;
+
     }
     catch (error) {
       console.error('Error saving transaction:', error);
@@ -49,6 +76,9 @@ export class TransactionsService {
     }
     
   }
+
+
+    
 
   findAll() {
     return `This action returns all transactions`;
@@ -75,7 +105,18 @@ export class TransactionsService {
   
   async update(id: string, updateTransactionDto: UpdateTransactionDto, user_id: string): Promise<UpdateResult> {
     try {
-      return await this.transactionRepository.update({ id, user_id: { id: user_id } }, updateTransactionDto);
+      const updateData = {
+        ...updateTransactionDto,
+        envelope_origin: updateTransactionDto.envelope_origin ? { id: updateTransactionDto.envelope_origin } : undefined,
+        envelope_destination: updateTransactionDto.envelope_destination ? { id: updateTransactionDto.envelope_destination } : undefined,
+      };
+      const transactionUpdate: UpdateResult = await this.transactionRepository.update({ id, user_id: { id: user_id } }, updateData);
+
+      if(transactionUpdate.affected === 0)
+        throw new NotFoundException(`Transaction with ID ${id} not found`);
+
+      return transactionUpdate;
+
     } catch (error) {
       console.error('Error updating transaction:', error);
       throw new Error('Failed to update transaction');
@@ -84,15 +125,22 @@ export class TransactionsService {
 
   async remove(id: string, user_id: string): Promise<DeleteResult> {
     try {
-      return await this.transactionRepository.delete({ id, user_id: { id: user_id } });
+
+      const transaction: DeleteResult = await this.transactionRepository.delete({ id, user_id: { id: user_id } });
+      
+      if(transaction.affected === 0)
+          throw new NotFoundException(`Transaction with ID ${id} not found`);
+
+      return transaction;
+
     }
     catch (error) {
       console.error('Error deleting transaction:', error);
       throw new Error('Failed to delete transaction');
+    
     }
+  
   }
-
- 
 
   /**
    * Información para el dashboard

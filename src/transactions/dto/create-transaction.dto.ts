@@ -1,7 +1,8 @@
-import { IsCurrency, IsDecimal, IsEmpty, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
+import { IsCurrency, IsDecimal, IsEmpty, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
 import { CategoryEntity } from "../../categories/entities/category.entity";
 import { UserEntity } from "../../users/entities/user.entity";
 import { EnvelopeEnity } from "@/envelopes/entities/envelope.entity";
+import { TransactionType } from "../entities/transaction.entity";
 
 export class CreateTransactionDto 
 {
@@ -17,11 +18,18 @@ export class CreateTransactionDto
     @IsOptional()
     description?: string;
 
+    @IsEnum(['income', 'expense', 'transfer'])
+    type: TransactionType;
+
     @IsString()
     @IsUUID()
     category_id: CategoryEntity;
 
-    @IsString()
     @IsUUID()
-    envelope_id: EnvelopeEnity;
+    @IsOptional()
+    envelope_origin?: string;
+
+    @IsUUID()
+    @IsOptional()
+    envelope_destination?: string;
 }

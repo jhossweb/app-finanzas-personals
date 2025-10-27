@@ -8,6 +8,7 @@ import { AuthModule } from './auth/auth.module';
 import { TransactionsModule } from './transactions/transactions.module';
 import { DashboardModule } from './dashboard/dashboard.module';
 import { EnvelopesModule } from './envelopes/envelopes.module';
+import { TransferModule } from './transfer.module';
 
 @Module({
   imports: [
@@ -21,7 +22,8 @@ import { EnvelopesModule } from './envelopes/envelopes.module';
     AuthModule,
     TransactionsModule,
     DashboardModule,
-    EnvelopesModule
+    EnvelopesModule,
+    TransferModule
   ],
   controllers: [],
   providers: [],
