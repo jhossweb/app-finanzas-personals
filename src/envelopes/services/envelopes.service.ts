@@ -37,7 +37,58 @@ export class EnvelopesService {
     }
   }
 
- 
+  /** sumar monto en el sobere al crear la transaccion */
+  async addAmountToEnvelope(envelopeId: string, amount: number) {
+    console.log(`servicio de sobre: ${envelopeId}`)
+  
+    const envelope = await this.envelopeRepository.findOne({ where: { id: envelopeId } });
+    if (!envelope) throw new NotFoundException(`Envelope with ID ${envelopeId} not found`);
+
+    try {
+      envelope.envelope_amount = Number(envelope.envelope_amount) + Number(amount);
+
+      console.log(`Nuevo saldo del sobre: ${envelope.envelope_amount}`);
+      return await this.envelopeRepository.save(envelope);
+    } catch (error) {
+      throw new InternalServerErrorException(`Error adding amount to envelope: ${error.message}`);
+    }
+  }
+
+  /** restar monto en el sobere al crear la transaccion */
+  async subtractAmountFromEnvelope(envelopeId: string, amount: number) {
+    const envelope = await this.envelopeRepository.findOne({ where: { id: envelopeId } });
+    if (!envelope) throw new NotFoundException(`Envelope with ID ${envelopeId} not found`);
+
+    if (envelope.envelope_amount < amount || amount <= 0)  
+        throw new BadRequestException({
+          message: 'Saldo insuficiente o la cantidad es inválida',
+          envelopeId
+        });
+
+
+    try {
+      envelope.envelope_amount = Number(envelope.envelope_amount) - Number(amount);
+      return await this.envelopeRepository.save(envelope);
+    } catch (error) {
+      throw new InternalServerErrorException(`Error subtracting amount from envelope: ${error.message}`);
+    }
+  }
+
+  /** actualizar sobres al realizar una transferencia */
+  async updateAmountEnvelopes(envelopeOriginId: string, envelopeDestinationId: string, amount: number) {
+    
+    try {
+      
+      await this.envelopeRepository.update(envelopeOriginId, { envelope_amount: () => `envelope_amount - ${amount}` });
+      await this.envelopeRepository.update(envelopeDestinationId, { envelope_amount: () => `envelope_amount + ${amount}` });
+
+
+    } catch (error) {
+      throw new InternalServerErrorException(`Error updating envelopes: ${error.message}`);
+    }
+
+  }
+
 
   async findEnvelopeByUserId(id: string): Promise<EnvelopeEnity | null >{
     try {
@@ -53,10 +104,6 @@ export class EnvelopesService {
       throw new NotFoundException(`Envelope with User ID ${id} not found`);
     }
   }
-
-
-
-
 
   findAll() {
     return `This action returns all envelopes`;
