@@ -5,28 +5,20 @@ import { IsBoolean, IsNotEmpty, IsOptional, IsString, IsUUID } from 'class-valid
 export class UpdateCategoryDto extends PartialType(CreateCategoryDto) {
     
     @IsOptional()
-    @IsUUID()
-    id?: string;
-
-    @IsOptional()
     @IsString()
     name?: string;
 
     @IsOptional()
     @IsString()
-    type?: string;
+    description?: string;
 
     @IsOptional()
-    @IsString()
-    description?: string;
+    @IsBoolean()
+    isActive?: boolean;
 }
 
 
-export class UpdateCategoryActive {
-    @IsOptional()
-    @IsUUID()
-    id?: string;
-
+export class UpdateCategoryActiveDto {
     @IsNotEmpty()
     @IsBoolean()
     isActive: boolean;

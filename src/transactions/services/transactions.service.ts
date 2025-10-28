@@ -74,7 +74,7 @@ export class TransactionsService {
   async create(dataDto: CreateTransactionDto, user_id: string) 
   {
 
-    const category = await this.categoryService.findOneCategoryPersonal(String(dataDto.category_id));
+    const category = await this.categoryService.findOneCategory(user_id, String(dataDto.category_id));
     if (!category) throw new NotFoundException(`Category with ID ${dataDto.category_id} not found`);
     
     await this.validateTypeTransaction(dataDto);

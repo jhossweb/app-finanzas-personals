@@ -3,15 +3,6 @@ import { BaseEntity } from "../../config/base.entity";
 import { UserEntity } from "../../users/entities/user.entity";
 import { TransactionEntity } from "../../transactions/entities/transaction.entity";
 
-export enum CategoryType {
-    INCOME = 'ingreso',
-    EXPENSE = 'gasto',
-    TRANSFER = 'transferencia',
-    INVESTMENT = 'inversion',
-    DEBT = 'deuda',
-    SAVINGS = 'ahorro',
-    OTHER = 'otro',
-}
 
 @Entity({ name: 'categories' })
 export class CategoryEntity extends BaseEntity {
@@ -24,20 +15,12 @@ export class CategoryEntity extends BaseEntity {
     name: string;
 
     @Column({
-        type: 'text',
-        default: CategoryType.OTHER,
-    })
-    type: CategoryType;
-
-    @Column({
         type: 'varchar',
         length: 255,
         nullable: true,
     })
     description?: string;
 
-    @Column({ default: true })
-    isDefault: boolean;
 
     @Column({ type: 'boolean', default: true })
     isActive: boolean;
@@ -48,15 +31,6 @@ export class CategoryEntity extends BaseEntity {
         { nullable: true, onDelete: 'CASCADE' }
     )
     user: UserEntity;
-
-    // Relación recursiva: cada categoría puede tener una categoría padre
-    @ManyToOne(() => CategoryEntity, (category) => category.children, { nullable: true, onDelete: 'SET NULL' })
-    @JoinColumn({ name: 'parent_id' })
-    parent: CategoryEntity;
-
-    // Relación recursiva: una categoría puede tener muchas categorías hijas
-    @OneToMany(() => CategoryEntity, (category) => category.parent)
-    children: CategoryEntity[];
 
 
     @OneToMany( () => TransactionEntity, (transaction) => transaction.category_id)
