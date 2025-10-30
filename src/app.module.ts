@@ -11,6 +11,7 @@ import { EnvelopesModule } from './envelopes/envelopes.module';
 
 
 
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -24,10 +25,10 @@ import { EnvelopesModule } from './envelopes/envelopes.module';
     TransactionsModule,
     DashboardModule,
     EnvelopesModule,
-
-
   ],
   controllers: [],
-  providers: [],
+  providers: [
+   
+  ],
 })
 export class AppModule {}
