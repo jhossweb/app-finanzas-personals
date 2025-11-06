@@ -21,7 +21,7 @@ export class TransactionsController {
     @Req() req: Request
   ) {
     const user = req.user as UserEntity
-    
+    console.log(createTransactionDto)
     return await this.transactionsService.create(createTransactionDto, user.id) ;
   }
 

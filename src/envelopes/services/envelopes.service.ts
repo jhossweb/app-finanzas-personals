@@ -4,6 +4,7 @@ import { UpdateEnvelopeDto } from '@/envelopes/dto/update-envelope.dto';
 import { In, Repository, Equal, DeleteResult, UpdateResult } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { EnvelopeEnity } from '../entities/envelope.entity';
+import { TransactionEntity } from '@/transactions/entities/transaction.entity';
 
 @Injectable()
 export class EnvelopesService {
@@ -11,6 +12,9 @@ export class EnvelopesService {
   constructor(
     @InjectRepository(EnvelopeEnity)
     private readonly envelopeRepository: Repository<EnvelopeEnity>,
+
+    @InjectRepository(TransactionEntity)
+    private readonly transactionRepository: Repository<TransactionEntity>,
   ) {}
 
   async create(createEnvelopeDto: CreateEnvelopeDto) {
@@ -90,13 +94,11 @@ export class EnvelopesService {
   }
 
 
-  async findEnvelopeByUserId(id: string): Promise<EnvelopeEnity | null >{
+  async findEnvelopeByUserId(id: string): Promise<EnvelopeEnity[] | null >{
     try {
-      const envelopes = await this.envelopeRepository.findOne({
+      const envelopes = await this.envelopeRepository.find({
         where: { user_id: Equal(id) }
       });
-
-      console.log(envelopes)
 
       return envelopes;
 
@@ -109,8 +111,28 @@ export class EnvelopesService {
     return `This action returns all envelopes`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} envelope`;
+  async findOne(id: string, user_id: string): Promise<{ envelope: EnvelopeEnity; transactions: TransactionEntity[] } | null > {
+     try {
+        const envelope = await this.envelopeRepository.findOne({ where: { id: Equal(id), user_id: Equal(user_id) } });
+
+        if (!envelope) {
+          throw new NotFoundException(`Envelope with ID ${id} not found`);
+        }
+
+
+        const transactions = await this.transactionRepository
+            .createQueryBuilder('t')
+            .where('t.envelope_origin = :id', { id })
+            .orWhere('t.envelope_destination = :id', { id })
+            .andWhere('t.user_id = :user_id', { user_id })
+           
+            .getMany();
+
+        return {envelope, transactions};
+
+    } catch (error) { 
+      throw new NotFoundException(`Transactions for Envelope ID ${id} not found`);
+    }
   }
 
   async update(id: string, updateEnvelopeDto: UpdateEnvelopeDto): Promise<UpdateResult | undefined> {

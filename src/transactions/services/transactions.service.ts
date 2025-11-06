@@ -6,8 +6,7 @@ import { CreateTransactionDto } from '../dto/create-transaction.dto';
 import { UpdateTransactionDto } from '../dto/update-transaction.dto';
 import { TransactionEntity } from '../entities/transaction.entity';
 import { CategoriesService } from '@/categories/services/categories.service';
-import { NotFoundError } from 'rxjs';
-import { parse } from 'path';
+
 import { EnvelopesService } from '@/envelopes/services/envelopes.service';
 
 
@@ -73,7 +72,7 @@ export class TransactionsService {
 
   async create(dataDto: CreateTransactionDto, user_id: string) 
   {
-
+    
     const category = await this.categoryService.findOneCategory(user_id, String(dataDto.category_id));
     if (!category) throw new NotFoundException(`Category with ID ${dataDto.category_id} not found`);
     
@@ -86,6 +85,8 @@ export class TransactionsService {
       envelope_origin: dataDto.envelope_origin ? { id: dataDto.envelope_origin } : undefined,
       envelope_destination: dataDto.envelope_destination ? { id: dataDto.envelope_destination } : undefined,
     });
+    console.log(transaction)
+
 
     
     try {

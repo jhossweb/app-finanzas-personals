@@ -27,6 +27,15 @@ export class EnvelopesController {
     return this.envelopesService.findEnvelopeByUserId(user.id);
   }
 
+  @Get(':id')
+  findOne(
+    @Param('id') id: string,
+    @Req() req: Request
+  ) {
+    const user = req.user as UserEntity;
+    return this.envelopesService.findOne(id, user.id);
+  }
+
   @Patch(':id')
   update(@Param('id') id: string, @Body() updateEnvelopeDto: UpdateEnvelopeDto) {
     return this.envelopesService.update(id, updateEnvelopeDto);
